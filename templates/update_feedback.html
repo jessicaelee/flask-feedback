@@ -1,7 +1,8 @@
-{% extends 'base.html' %} {% block title %} Login {% endblock %} {% block header
-%} Login {%endblock %} {% block content %}
+{% extends 'base.html' %} {% block title %} Update {{feedback.title}} {%
+endblock %} {% block header %} Update {{feedback.title}} {%endblock %} {% block
+content %}
 
-<form id="login-user-form" method="POST">
+<form id="update-feedback-form" method="POST">
     {{ form.hidden_tag() }}
     <!--add type=hidden form fields -->
 
@@ -15,6 +16,10 @@
     {% endfor %}
 
     <button type="submit">Submit</button>
+</form>
+
+<form action="/feedback/{{feedback.id}}/delete" method="post">
+    <button type="submit">Delete Feedback</button>
 </form>
 
 {% endblock %}

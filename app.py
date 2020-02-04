@@ -1,10 +1,10 @@
 from flask import Flask, render_template, redirect, session, flash
-from models import db, bcrypt, connect_db, User
-from forms import RegisterUser, LoginUser
+from models import db, bcrypt, connect_db, User, Feedback
+from forms import RegisterUser, LoginUser, FeedbackForm
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///flaskfeedback'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///flask-feedback'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config["SECRET_KEY"] = "sekrit key"
@@ -71,8 +71,8 @@ def show_secret(username):
         return redirect("/")
 
     user = User.query.get_or_404(username)
-
-    return render_template("user_detail.html", user=user)
+    feedback = Feedback.query.filter_by(username_fk=user.username).all()
+    return render_template("user_detail.html", user=user, feedback=feedback)
 
 @app.route('/logout')
 def logout_user():
@@ -81,3 +81,74 @@ def logout_user():
     session.pop("username")
 
     return redirect("/")
+
+@app.route('/users/<username>/delete', methods=['POST'])
+def remove_users_and_feedback(username):
+    """remove user from db and delete all their feedback"""
+     
+    if "username" not in session:
+        # flash("You must be logged in to view!")
+        return redirect("/")
+
+    user = User.query.get_or_404(username)
+    db.session.delete(user)
+    db.session.commit()
+
+    return redirect("/")
+
+@app.route('/users/<username>/feedback/add', methods=['GET', 'POST'])
+def add_feedback(username):
+    """display a form to add feedback and post feedback"""
+
+    if "username" not in session:
+        # flash("You must be logged in to view!")
+        return redirect("/")
+
+    form = FeedbackForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        new_feedback = Feedback(title=title, content=content, username_fk=username)
+        db.session.add(new_feedback)
+        db.session.commit()
+        return redirect(f'/users/{username}')
+    
+    return render_template("add_feedback.html", form=form)
+
+@app.route('/feedback/<int:feedback_id>/update', methods=['GET', 'POST'])
+def update_feedback(feedback_id):
+    """display a form to edit feedback and post feedback"""
+
+    if "username" not in session:
+        # flash("You must be logged in to view!")
+        return redirect("/")
+
+    feedback = Feedback.query.get_or_404(feedback_id)
+    form = FeedbackForm(obj=feedback)
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        feedback.title = title
+        feedback.content = content 
+        db.session.commit()
+        return redirect(f'/users/{feedback.username_fk}')
+    
+    return render_template("update_feedback.html", form=form, feedback=feedback)
+
+
+@app.route('/feedback/<int:feedback_id>/delete', methods=['POST'])
+def delete_feedback(feedback_id):
+    """delete a feedback post"""
+
+    if "username" not in session:
+        # flash("You must be logged in to view!")
+        return redirect("/")
+
+    feedback = Feedback.query.get_or_404(feedback_id)
+    username = feedback.username_fk
+    db.session.delete(feedback)
+    db.session.commit()
+
+    return redirect(f"/users/{username}")

@@ -1,12 +1,25 @@
-{% extends 'base.html' %} 
-{% block title %} {{user.first_name}} {{user.last_name}} {% endblock %} 
-{% block header %} {{user.first_name}} {{user.last_name}} {%endblock %} 
-
-{% block content %}
+{% extends 'base.html' %} {% block title %} {{user.first_name}}
+{{user.last_name}} {% endblock %} {% block header %} {{user.first_name}}
+{{user.last_name}} {%endblock %} {% block content %}
 
 <div id="user-details">
-  <p>Username: {{user.username}}</p>
-  <p>Email: {{user.email}}</p>
+    <p>Username: {{user.username}}</p>
+    <p>Email: {{user.email}}</p>
+    <p>
+        Feedback: <br />
+        {% for feedback in user.feedback %}
+        <a href="/feedback/{{feedback.id}}/update">{{feedback.title}}<br /></a>
+
+        {% endfor %}
+    </p>
+    <button type="submit">
+        <a href="/users/{{user.username}}/feedback/add">Add feedback</a>
+    </button>
+    <form action="/users/{{user.username}}/delete" method="post">
+        <button type="submit">
+            Delete User
+        </button>
+    </form>
 </div>
 
 {% endblock %}

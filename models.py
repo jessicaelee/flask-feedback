@@ -19,6 +19,8 @@ class User(db.Model):
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
 
+    feedback = db.relationship("Feedback", backref="user", cascade="all")
+
     # start_register
     @classmethod
     def register(cls, username, pwd, email, first_name, last_name):
@@ -49,3 +51,12 @@ class User(db.Model):
             return False
     # end_authenticate    
 
+class Feedback(db.Model):
+    """feedback model"""
+
+    __tablename__ = "feedback"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    username_fk = db.Column(db.String(20), db.ForeignKey('users.username'), nullable=False)
