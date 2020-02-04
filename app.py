@@ -33,10 +33,11 @@ def register_user():
 
         new_user = User.register(username, password, email, first_name, last_name)
 
-        db.session.add(new_user)
-        db.session.commit()
-
-        return redirect('/secret')
+        if new_user:
+            db.session.add(new_user)
+            db.session.commit()
+            session["username"] = new_user.username  # keep logged in
+            return redirect("/secret")
 
     return render_template("register.html", form=form)
 
@@ -65,4 +66,16 @@ def login_user():
 def show_secret():
     """if user is logged in, show "You made it!"""
 
+    if "username" not in session:
+        flash("You must be logged in to view!")
+        return redirect("/")
+
     return render_template("secret.html")
+
+@app.route('/logout')
+def logout_user():
+    """Logs user out and redirects to homepage."""
+
+    session.pop("username")
+
+    return redirect("/")
