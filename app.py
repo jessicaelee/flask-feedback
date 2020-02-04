@@ -66,8 +66,8 @@ def login_user():
 def show_secret(username):
     """if user is logged in, show "You made it!"""
 
-    if "username" not in session:
-        flash("You must be logged in to view!")
+    if "username" not in session or session['username'] != username:
+        # flash("You must be logged in to view!")
         return redirect("/")
 
     user = User.query.get_or_404(username)
