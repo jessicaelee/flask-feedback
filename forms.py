@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField
 from wtforms.validators import InputRequired, Email
 
-class AddUser(FlaskForm):
+class RegisterUser(FlaskForm):
     """Form for adding users"""
 
     username = StringField('Username', validators=[InputRequired()])
